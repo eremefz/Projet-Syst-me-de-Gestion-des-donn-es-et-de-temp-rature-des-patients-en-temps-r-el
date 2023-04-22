@@ -1,0 +1,25 @@
+const int LM35_PIN = A0; // broche analogique du capteur LM35
+int temperature = 0; // variable pour stocker la température
+
+void setup() {
+  Serial.begin(9600); // ouvre le port série à 9600 bauds
+}
+
+void loop() {
+  // mesure la tension sur la broche du capteur LM35
+  int sensorVoltage = analogRead(LM35_PIN);
+  
+  // convertit la tension en température en degrés Celsius
+  temperature = (sensorVoltage * 500) / 1024;
+  
+  // envoie la température via le port série lorsqu'un "T" est reçu
+  if (Serial.available() > 0) {
+    char incomingByte = Serial.read();
+    if (incomingByte == 'T') {
+      Serial.println(temperature);
+    }
+  }
+  
+  delay(1000); // attend une seconde avant de refaire la mesure
+}
+

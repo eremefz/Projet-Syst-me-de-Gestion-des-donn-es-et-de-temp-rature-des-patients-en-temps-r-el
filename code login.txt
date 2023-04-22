@@ -1,0 +1,27 @@
+Public Class LogIn
+    Private Sub ConnecterBtn_Click(sender As Object, e As EventArgs) Handles ConnecterBtn.Click
+        If USERDr.Text = "" Or PASSDr.Text = "" Then
+            MsgBox("Entrer le Nom de Doctor et le Mot de passe")
+        ElseIf (USERDr.Text = "Admin" And PASSDr.Text = "123") Then
+            Dim Obj = New PageAcueille
+            Obj.Show()
+            Me.Hide()
+        Else
+            MsgBox("Nom de Doctor ou le Mot de passe est erronée")
+        End If
+    End Sub
+
+    Private Sub Reset_Click(sender As Object, e As EventArgs) Handles Reset.Click
+        USERDr.Text = ""
+        PASSDr.Text = ""
+    End Sub
+
+    Private Sub Guna2Button1_Click(sender As Object, e As EventArgs) Handles Guna2Button1.Click
+        USERDr.Text = ""
+        PASSDr.Text = ""
+    End Sub
+
+    Private Sub LogIn_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+End Class

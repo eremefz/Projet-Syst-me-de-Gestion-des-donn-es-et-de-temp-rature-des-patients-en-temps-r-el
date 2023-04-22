@@ -1,0 +1,31 @@
+Public Class PageAcueille
+    Private Sub btnPatients_Click(sender As Object, e As EventArgs) Handles btnPatients.Click
+        Me.Hide()
+        Dim Obj = New Patients
+        Obj.Show()
+
+    End Sub
+
+    Private Sub btnAcueille_Click(sender As Object, e As EventArgs) Handles btnAcueille.Click
+        Me.Hide()
+        Dim Obj = New PageAcueille
+        Obj.Show()
+    End Sub
+
+    Private Sub btnNouveau_Click(sender As Object, e As EventArgs) Handles btnNouveau.Click
+        Me.Hide()
+        Dim Obj = New Nouveau
+        Obj.Show()
+    End Sub
+
+
+    Private Sub déconnecter_Click(sender As Object, e As EventArgs) Handles déconnecter.Click
+        Me.Hide()
+        Dim Obj = New LogIn
+        Obj.Show()
+    End Sub
+
+    Private Sub PageAcueille_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+End Class

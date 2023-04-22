@@ -1,0 +1,161 @@
+Imports System.Data.SqlClient
+
+Public Class Nouveau
+    Dim Connection As New SqlConnection("Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\lenovo\Documents\study\ISERT\S2\cpp&py\projet\projet corricte\Project\HopitalDB.mdf;Integrated Security=True;Connect Timeout=30")
+    Dim cmd As SqlCommand
+
+    Private Sub Affichage()
+        Connection.Close()
+        Dim query = "Select * from NTable"
+        Dim adapter As SqlDataAdapter
+        adapter = New SqlDataAdapter(query, Connection)
+        Dim builder As New SqlCommandBuilder(adapter)
+        Dim ds As DataSet
+        ds = New DataSet
+        adapter.Fill(ds)
+        NData.DataSource = ds.Tables(0)
+        Connection.Close()
+
+    End Sub
+    Private Sub Reset()
+        CIN.Text = ""
+        DateInscription.Text = ""
+        Nom.Text = ""
+        Prenom.Text = ""
+        DN.Text = ""
+        Adresse.Text = ""
+        Numero.Text = ""
+        Genre.SelectedIndex = -1
+    End Sub
+    'Pour l'affichage des données 
+    Private Sub PanelForm_Paint(sender As Object, e As PaintEventArgs) Handles PanelForm.Paint
+        Affichage()
+    End Sub
+    'Pour selectionner la ligne a supprimer
+    Dim key = 0
+    Private Sub NData_CellMouseClick(sender As Object, e As DataGridViewCellMouseEventArgs)
+
+        Dim row As DataGridViewRow = NData.Rows(e.RowIndex)
+        CIN.Text = row.Cells("CIN").Value.ToString()
+        DateInscription.Value = DateTime.Parse(row.Cells("DateInscription").Value.ToString())
+        Nom.Text = row.Cells("Nom").Value.ToString()
+        Prenom.Text = row.Cells("Prenom").Value.ToString()
+        DN.Value = DateTime.Parse(row.Cells("DN").Value.ToString())
+        Adresse.Text = row.Cells("Adresse").Value.ToString()
+        Numero.Text = row.Cells("Numero").Value.ToString()
+        Genre.SelectedItem = row.Cells("Genre").Value.ToString()
+
+        If CIN.Text = "" Then
+            key = 0
+        Else
+            key = Convert.ToInt32(row.Cells(0).Value)
+        End If
+    End Sub
+
+    Private Sub EnregistrerB_Click(sender As Object, e As EventArgs) Handles EnregistrerB.Click
+        If Nom.Text = "" Or Prenom.Text = "" Or Adresse.Text = "" Or CIN.Text = "" Or Numero.Text = "" Or Genre.SelectedIndex = -1 Then
+            MsgBox("Les champs ne sont pas remplis.")
+        Else
+
+            ' Ouvre la connexion à la base de données
+            Connection.Open()
+            ' Définit la commande SQL pour l'insertion de données
+            Dim query As String = "INSERT INTO NTable (CIN, DateInscription, Nom, Prenom, DN, Adresse, Numero, Genre) VALUES (@value1, @value2, @value3, @value4, @value5, @value6, @value7, @value8)"
+            Dim cmd As New SqlCommand(query, Connection)
+
+            ' Clear any previously declared parameters
+            cmd.Parameters.Clear()
+            ' Add new parameters
+            cmd.Parameters.AddWithValue("@value1", CIN.Text)
+            cmd.Parameters.AddWithValue("@value2", DateInscription.Value.Date)
+            cmd.Parameters.AddWithValue("@value3", Nom.Text)
+            cmd.Parameters.AddWithValue("@value4", Prenom.Text)
+            cmd.Parameters.AddWithValue("@value5", DN.Value.Date)
+            cmd.Parameters.AddWithValue("@value6", Adresse.Text)
+            cmd.Parameters.AddWithValue("@value7", Numero.Text)
+            cmd.Parameters.AddWithValue("@value8", Genre.SelectedItem.ToString)
+            'Exécute la commande SQL pour insérer les données dans la table
+            cmd.ExecuteNonQuery()
+            MsgBox("Patient enregistré avec succès.")
+
+            ' Ferme la connexion à la base de données
+            Connection.Close()
+
+            ' Réinitialise les champs de saisie de texte
+            Affichage()
+            Reset()
+        End If
+    End Sub
+    Private Sub ModifierB_Click(sender As Object, e As EventArgs)
+        If key = 0 Then
+            MsgBox("Veuillez sélectionner une ligne à modifier.")
+        Else
+            Connection.Open()
+            Dim query As String = "UPDATE NTable SET CIN = @value1, DateInscription = @value2, Nom= @value3, Prenom = @value4, DN = @value5, Adresse = @value6, Numero = @value7, Genre = @value8 WHERE CIN = @key"
+            Dim cmd As New SqlCommand(query, Connection)
+
+            cmd.Parameters.AddWithValue("@value1", CIN.Text)
+            cmd.Parameters.AddWithValue("@value2", DateInscription.Value.Date)
+            cmd.Parameters.AddWithValue("@value3", Nom.Text)
+            cmd.Parameters.AddWithValue("@value4", Prenom.Text)
+            cmd.Parameters.AddWithValue("@value5", DN.Value.Date)
+            cmd.Parameters.AddWithValue("@value6", Adresse.Text)
+            cmd.Parameters.AddWithValue("@value7", Numero.Text)
+            cmd.Parameters.AddWithValue("@value8", Genre.SelectedItem.ToString())
+            cmd.Parameters.AddWithValue("@key", key)
+
+            cmd.ExecuteNonQuery()
+            MsgBox("Modification effectuée avec succès.")
+            Affichage()
+            Reset()
+            Connection.Close()
+        End If
+    End Sub
+    Private Sub SupprimerB_Click(sender As Object, e As EventArgs)
+        If key = 0 Then
+            MsgBox("Sélectionner une ligne pour supprimer.")
+        Else
+            Dim query As String = "DELETE FROM NTable WHERE CIN = @CIN"
+            Using cmd As New SqlCommand(query, Connection)
+                cmd.Parameters.AddWithValue("@CIN", key)
+                Connection.Open()
+                Dim rowsAffected As Integer = cmd.ExecuteNonQuery()
+                Connection.Close()
+                If rowsAffected > 0 Then
+                    MsgBox("Le patient a été supprimé avec succès.")
+                    ' Remove the selected row from the DataGridView
+                    NData.Rows.RemoveAt(NData.CurrentRow.Index)
+                    Reset()
+                Else
+                    MsgBox("La suppression a échoué.")
+                End If
+            End Using
+        End If
+
+    End Sub
+
+    Private Sub btnPatients_Click(sender As Object, e As EventArgs) Handles btnPatients.Click
+        Me.Hide()
+        Dim Obj = New Patients
+        Obj.Show()
+
+    End Sub
+
+    Private Sub btnAcueille_Click(sender As Object, e As EventArgs) Handles btnAcueille.Click
+        Me.Hide()
+        Dim Obj = New PageAcueille
+        Obj.Show()
+    End Sub
+
+    Private Sub btnNouveau_Click(sender As Object, e As EventArgs) Handles btnNouveau.Click
+        Me.Hide()
+        Dim Obj = New Nouveau
+        Obj.Show()
+    End Sub
+
+    Private Sub déconnecter_Click(sender As Object, e As EventArgs) Handles déconnecter.Click
+        Me.Hide()
+        Dim Obj = New LogIn
+        Obj.Show()
+    End Sub
+End Class

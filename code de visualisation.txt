@@ -1,0 +1,313 @@
+Imports System.IO.Ports
+Imports System.Threading
+Imports System.Timers
+
+
+Public Class vision
+    Dim vpb_sy, vpb_ly As Integer
+    Dim SpeedL, TempL, BattL As Integer
+    Dim TempToProgressBar As Single
+    Dim Speed, Batt, Temp, SpeedResult, BatteryResult, TempResult As String
+    Dim StrSerialIn, StrSerialInRam As String
+    Dim ChartLimit As Integer = 30
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.CenterToScreen()
+        ConnectionPanel.Focus()
+
+        ComboBoxBaudRate.SelectedIndex = 0
+
+        '-------------------création du graphique par défaut----------------------------------'
+        For i = 0 To 30 Step 1
+            ChartTemperature.Series("Temperature").Points.AddY(0)
+            If ChartTemperature.Series(0).Points.Count = ChartLimit Then
+                ChartTemperature.Series(0).Points.RemoveAt(0)
+            End If
+        Next
+        '-----------------------------------------------------------------------------
+        '------------------Définition des valeurs du graphique-------------------------------'
+        ChartTemperature.ChartAreas(0).AxisY.Maximum = 40
+        ChartTemperature.ChartAreas(0).AxisY.Minimum = 0
+        ChartTemperature.ChartAreas("ChartArea1").AxisX.LabelStyle.Enabled = False
+        '-----------------------------------------------------------------------------
+    End Sub
+
+    '================================ Connection Panel ======================================='
+    Private Sub ButtonScanPort_Click(sender As Object, e As EventArgs) Handles ButtonScanPort.Click
+        ConnectionPanel.Focus()
+        If LabelStatus.Text = "Status : Connected" Then
+            MsgBox("Conncetion in progress, please Disconnect to scan the new port.", MsgBoxStyle.Critical, "Warning !!!")
+            Return
+        End If
+        ComboBoxPort.Items.Clear()
+        Dim myPort As Array
+        Dim i As Integer
+        myPort = IO.Ports.SerialPort.GetPortNames()
+        ComboBoxPort.Items.AddRange(myPort)
+        i = ComboBoxPort.Items.Count
+        i = i - i
+        Try
+            ComboBoxPort.SelectedIndex = i
+            ButtonConnect.Enabled = True
+        Catch ex As Exception
+            MsgBox("Com port not detected", MsgBoxStyle.Critical, "Warning !!!")
+            ComboBoxPort.Text = ""
+            ComboBoxPort.Items.Clear()
+            Return
+        End Try
+        ComboBoxPort.DroppedDown = True
+    End Sub
+
+    Private Sub ComboBoxPort_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxPort.SelectedIndexChanged
+        ConnectionPanel.Focus()
+    End Sub
+
+    Private Sub ComboBoxPort_DropDown(sender As Object, e As EventArgs) Handles ComboBoxPort.DropDown
+        ConnectionPanel.Focus()
+    End Sub
+
+    Private Sub ChartTemperature_Click(sender As Object, e As EventArgs) Handles ChartTemperature.Click
+
+    End Sub
+
+
+
+    Private Sub PictureBox1_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub Button_Click(sender As Object, e As EventArgs) Handles Button.Click, Button1.Click
+        Me.Hide()
+        Dim Obj = New Patients
+
+        Obj.Show()
+
+    End Sub
+
+    Private Sub TempBox_Click(sender As Object, e As EventArgs) Handles TempBox.Click, TempBox1.Click
+
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub CircularProgressBar1_Click(sender As Object, e As EventArgs) Handles CircularProgressBar.Click
+
+    End Sub
+
+    Private Sub ConnectionPanel_Paint(sender As Object, e As PaintEventArgs) Handles ConnectionPanel.Paint
+
+    End Sub
+
+    Private Sub Label1_Click(sender As Object, e As EventArgs) Handles Label1.Click, Label5.Click, Label6.Click, Label4.Click, Label3.Click, Label7.Click, Label9.Click, Label8.Click, Label11.Click, Label10.Click
+
+    End Sub
+
+    Private Sub Panel1_Paint(sender As Object, e As PaintEventArgs) Handles Panel1.Paint
+
+    End Sub
+
+    Private Sub Panel2_Paint(sender As Object, e As PaintEventArgs)
+
+    End Sub
+
+    Private Sub PictureBox1_Click_1(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub Panel2_Paint_1(sender As Object, e As PaintEventArgs) Handles Panel2.Paint
+
+    End Sub
+
+    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
+
+    End Sub
+
+    Private Sub LinkLabel_LinkClicked_1(sender As Object, e As LinkLabelLinkClickedEventArgs)
+
+    End Sub
+
+    Private Sub ComboBoxPort_Click(sender As Object, e As EventArgs) Handles ComboBoxPort.Click
+        If LabelStatus.Text = "Status : Connected" Then
+            MsgBox("Connection in progress, please Disconnect to change COM.", MsgBoxStyle.Critical, "Warning !!!")
+            Return
+        End If
+    End Sub
+
+    Private Sub ComboBoxBaudRate_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxBaudRate.SelectedIndexChanged
+        ConnectionPanel.Focus()
+    End Sub
+
+
+
+    Private Sub ComboBoxBaudRate_DropDown(sender As Object, e As EventArgs) Handles ComboBoxBaudRate.DropDown
+        ConnectionPanel.Focus()
+    End Sub
+
+
+    Private Sub ComboBoxBaudRate_Click(sender As Object, e As EventArgs) Handles ComboBoxBaudRate.Click
+        If LabelStatus.Text = "Status : Connected" Then
+            'MsgBox("Conncetion in progress, please Disconnect to change Baud Rate.", MsgBoxStyle.Critical, "Warning !!!")
+            Return
+        End If
+    End Sub
+
+    Private Sub ButtonConnect_Click(sender As Object, e As EventArgs) Handles ButtonConnect.Click
+        ConnectionPanel.Focus()
+        Try
+            SerialPort1.BaudRate = ComboBoxBaudRate.SelectedItem
+            SerialPort1.PortName = ComboBoxPort.SelectedItem
+            SerialPort1.Open()
+            TimerSerial.Start()
+
+            LabelStatus.Text = "Status : Connected"
+            ButtonConnect.SendToBack()
+            ButtonDisconnect.BringToFront()
+            PictureBoxConnectionStatus.BackColor = Color.Green
+        Catch ex As Exception
+            ' MsgBox("Please check the Hardware, COM, Baud Rate and try again.", MsgBoxStyle.Critical, "Connection failed !!!")
+        End Try
+    End Sub
+    Private Sub ButtonDisconnect_Click(sender As Object, e As EventArgs) Handles ButtonDisconnect.Click
+        ConnectionPanel.Focus()
+        TimerSerial.Stop()
+        SerialPort1.Close()
+        ButtonDisconnect.SendToBack()
+        ButtonConnect.BringToFront()
+        LabelStatus.Text = "Status : Disconnect"
+        PictureBoxConnectionStatus.Visible = True
+        PictureBoxConnectionStatus.BackColor = Color.Red
+    End Sub
+
+    '====================================== Connection Panel End ================================================'
+
+
+    '=============The function to convert values to PictureBoxPBTemp size so that it looks like a progress bar.
+    Function MapBatt(ByVal X As Single, ByVal In_min As Single, ByVal In_max As Single, ByVal Out_min As Single, ByVal Out_max As Single) As Integer
+        Dim A As Single
+        Dim B As Single
+        A = X - In_min
+        B = Out_max - Out_min
+        A = A * B
+        B = In_max - In_min
+        A = A / B
+        MapBatt = A + Out_min
+    End Function
+    '===========================================================================================================
+
+    '=======================================Showing values=============================================
+    Private Sub TimerSerial_Tick(sender As Object, e As EventArgs) Handles TimerSerial.Tick
+        Try
+            StrSerialIn = SerialPort1.ReadExisting  '--> Read incoming serial data
+
+            Dim TB As New TextBox
+            TB.Multiline = True
+            TB.Text = StrSerialIn   '--> Enter serial data into the textbox
+
+            If TB.Lines.Count > 0 Then
+                If TB.Lines(0) = "Failed to read from Your Bot !" Then '--> Check Arduino if it fails to read from the Bot, if this happens the connection is disconnected
+                    TimerSerial.Stop()
+                    SerialPort1.Close()
+                    LabelStatus.Text = "Status : Disconnect"
+                    ButtonDisconnect.SendToBack()
+                    ButtonConnect.BringToFront()
+                    PictureBoxConnectionStatus.Visible = True
+                    PictureBoxConnectionStatus.BackColor = Color.Red
+                    MsgBox("Failed to read from Bot !!!, Please check the Hardware and Please connect again.", MsgBoxStyle.Critical, "Connection failed !!!")
+                    Return
+                End If
+
+                '============================Extracting Values from incoming data ========================'
+
+
+
+
+                StrSerialInRam = TB.Lines(0).Substring(0, 1)
+                If StrSerialInRam = "T" Then
+                    Temp = TB.Lines(0)
+                    TempL = Temp.Length
+                Else
+                    Temp = Temp
+                End If
+
+
+
+
+                TempResult = Mid(Temp, 2, TempL)
+
+
+
+                '==============================================================================================='
+
+
+                CircularProgressBar.Value = TempResult
+                TempToProgressBar = TempResult
+                CircularProgressBar.Text = CircularProgressBar.Value
+
+                '-----------The process for making a progress bar using a picturebox (Vertical progress bar)-----------
+                vpb_sy = MapBatt(TempToProgressBar, -20.0, 60.0, 0, 120)
+                If vpb_sy > 120 Then
+                    vpb_sy = 120
+                End If
+                If vpb_sy < 0 Then
+                    vpb_sy = 0
+                End If
+                PictureBoxPBTemp.Height = PictureBoxPBTempBack.Height * vpb_sy / 120
+                vpb_ly = (PictureBoxPBTempBack.Height - vpb_sy) + PictureBoxPBTempBack.Location.Y
+                PictureBoxPBTemp.Location = New Point(PictureBoxPBTemp.Location.X, vpb_ly)
+
+                '===========Enter the values into the chart======================
+                ChartTemperature.Series("Temperature").Points.AddY(TempResult)
+                If ChartTemperature.Series(0).Points.Count = ChartLimit Then
+                    ChartTemperature.Series(0).Points.RemoveAt(0)
+                End If
+
+                '------------value into labelBox-----
+                TempBox.Text = TempResult & " °C"
+                TempBox1.Text = TempResult & " °C"
+
+                '==================================================================
+
+
+
+
+                '-----------The process for making a progress bar using a picturebox (Vertical Progress Bar -vpb )-----------
+                vpb_sy = MapBatt(BatteryResult, 0, 24, 0, 120) '--(value, inputMinimum, inputMax, PicBoxStartSize, PicBoxMaxSize)
+                If vpb_sy > 120 Then    'if the 'value' exceed the 'max value' of 'box size' then it will map the 'value'
+                    vpb_sy = 120
+                End If
+                If vpb_sy < 0 Then
+                    vpb_sy = 0
+                End If
+
+                '------------------------------------------------------------------------------------------------------
+
+                '-----------If the connection is successful and running, PictureBoxConnectionStatus will blink----
+                If PictureBoxConnectionStatus.Visible = True Then
+                    PictureBoxConnectionStatus.Visible = False
+                ElseIf PictureBoxConnectionStatus.Visible = False Then
+                    PictureBoxConnectionStatus.Visible = True
+                End If
+                '------------------------------------------------------------------------------------------------------
+
+
+            End If
+            Label2.Text = Date.Now.ToString("dddd, dd-MM-yy hh::mm::ss")
+        Catch ex As Exception
+            TimerSerial.Stop()
+            SerialPort1.Close()
+            LabelStatus.Text = "Status : Disconnect"
+            ButtonDisconnect.SendToBack()
+            ButtonConnect.BringToFront()
+            PictureBoxConnectionStatus.BackColor = Color.Red
+            'MsgBox("Please check the Hardware and Please connect again." & ex.Message, MsgBoxStyle.Critical, "Connection failed !!!")
+            Return
+        End Try
+    End Sub
+
+
+
+
+
+
+End Class

@@ -1,0 +1,93 @@
+Imports System.Data.SqlClient
+Imports Microsoft.VisualBasic.Logging
+
+Public Class Patients
+    Dim Connection As New SqlConnection("Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\lenovo\Documents\study\ISERT\S2\cpp&py\projet\projet corricte\Project\HopitalDB.mdf;Integrated Security=True;Connect Timeout=30")
+    Dim cmd As SqlCommand
+    Dim ds As DataSet
+
+    Private Sub Affichage()
+        Connection.Close()
+        Dim query = "Select * from NTable"
+        Dim adapter As SqlDataAdapter
+        adapter = New SqlDataAdapter(query, Connection)
+        Dim builder As New SqlCommandBuilder(adapter)
+        Dim ds As DataSet
+        ds = New DataSet
+        adapter.Fill(ds)
+        NData.DataSource = ds.Tables(0)
+        Connection.Close()
+
+    End Sub
+    Private Sub Patients_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Call Affichage() when the form is loaded
+        Affichage()
+    End Sub
+
+    Private Sub Filtrer()
+        If RecherchInput.Text = "" Then
+            MsgBox("Entrer Un Nom ")
+        Else
+            Connection.Close()
+            Dim query = "Select * from NTable Where Nom= '" & RecherchInput.Text & "'"
+            Dim adapter As SqlDataAdapter
+            adapter = New SqlDataAdapter(query, Connection)
+            Dim builder As New SqlCommandBuilder(adapter)
+            Dim ds As DataSet
+            ds = New DataSet
+            adapter.Fill(ds)
+            NData.DataSource = ds.Tables(0)
+            RecherchInput.Text = ""
+        End If
+    End Sub
+    Private Sub Rechercherbtn_Click(sender As Object, e As EventArgs) Handles Rechercherbtn.Click
+        Filtrer()
+    End Sub
+
+    Private Sub Guna2Button1_Click(sender As Object, e As EventArgs) Handles Guna2Button1.Click
+        Affichage()
+    End Sub
+
+    Private Sub btnPatients_Click(sender As Object, e As EventArgs) Handles btnPatients.Click
+        Me.Hide()
+        Dim Obj = New Patients
+        Obj.Show()
+
+    End Sub
+
+    Private Sub btnAcueille_Click(sender As Object, e As EventArgs) Handles btnAcueille.Click
+        Me.Hide()
+        Dim Obj = New PageAcueille
+        Obj.Show()
+    End Sub
+
+    Private Sub btnNouveau_Click(sender As Object, e As EventArgs) Handles btnNouveau.Click
+        Me.Hide()
+        Dim Obj = New Nouveau
+        Obj.Show()
+    End Sub
+
+    Private Sub déconnecter_Click(sender As Object, e As EventArgs) Handles déconnecter.Click
+        Me.Hide()
+        Dim Obj = New LogIn
+        Obj.Show()
+    End Sub
+
+    Private Sub E_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub Guna2Button2_Click(sender As Object, e As EventArgs) Handles Guna2Button2.Click
+        Me.Hide()
+        Dim Obj = New vision
+        Obj.Show()
+    End Sub
+
+    Private Sub NData_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles NData.CellContentClick
+
+    End Sub
+
+    Private Sub Panel_Paint(sender As Object, e As PaintEventArgs) Handles Panel.Paint
+
+    End Sub
+End Class
